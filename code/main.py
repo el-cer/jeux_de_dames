@@ -4,6 +4,7 @@ import numpy as np
 from back_game import Board
 from config import *
 import time
+from game import game
 # Initialize Pygame
 pygame.init()
 
@@ -14,13 +15,15 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Chess Board Example")
 clock = pygame.time.Clock()
-
 chess_board = Board()
+game = game()
+
 
 # Game loop
 running = True
 turn = 0
 click = False
+selected = None
 def regularise_row_col(pos):
     row = event.pos[1] // SQUARE_SIZE
     col = event.pos[0] // SQUARE_SIZE
@@ -28,24 +31,15 @@ def regularise_row_col(pos):
     return row,col
 while running:
     for event in pygame.event.get():
+        
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN: 
-             
-            click = True
-            
+            click = False
+   
             pos = pygame.mouse.get_pos() 
             row,col = regularise_row_col(pos)
-
-            chess_board.valid_moove(row,col)
-            chess_board.draw_valid_position(screen,row,col)
-            chess_board.moove(event,screen)
-            chess_board.remove()
-            chess_board.kill_enemy(event,turn)
-
-            
-
-        
+            chess_board.click(event,screen,row,col,click)
     # Clear the screen
     screen.fill(WHITE)
 
@@ -55,6 +49,7 @@ while running:
     # Draw the pieces
     chess_board.draw_pieces(screen)
     chess_board.sides()
+    chess_board.remove()
 
     # Refresh display
     pygame.display.flip()
