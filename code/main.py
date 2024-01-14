@@ -35,10 +35,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN: 
-            click = False
    
-            pos = pygame.mouse.get_pos() 
-            row,col = regularise_row_col(pos)
+            
             chess_board.click(event,screen,row,col,click)
     # Clear the screen
     screen.fill(WHITE)
