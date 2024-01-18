@@ -29,6 +29,9 @@ def regularise_row_col(pos):
     col = event.pos[0] // SQUARE_SIZE
     
     return row,col
+
+chess_board.draw_board(screen)
+chess_board.draw_pieces(screen)
 while running:
     for event in pygame.event.get():
         
@@ -36,24 +39,25 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN: 
    
+            pos = pygame.mouse.get_pos() 
+            row,col = regularise_row_col(pos)
+            screen.fill(WHITE)
+
             
-            chess_board.click(event,screen,row,col,click)
     # Clear the screen
-    screen.fill(WHITE)
+                
 
-    # Draw the chessboard
-    chess_board.draw_board(screen)
+            # Draw the chessboard
+            chess_board.draw_board(screen)
 
-    # Draw the pieces
-    chess_board.draw_pieces(screen)
-    chess_board.sides()
-    chess_board.remove()
+            # Draw the pieces
+            chess_board.click(event,screen,row,col,click)
+            chess_board.draw_pieces(screen)
 
-    # Refresh display
-    pygame.display.flip()
+            
+    pygame.display.update()
 
-    # Cap the frame rate
-    clock.tick(60)
+
 
 # Quit Pygame
 pygame.quit()
