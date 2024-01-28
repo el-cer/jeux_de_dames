@@ -8,6 +8,8 @@ class game:
           self.moove_yes_white = False
           self.moove_yes_black = False
           self.running = running
+          self.moove_row_col = None
+          
 
         
     
@@ -29,9 +31,9 @@ class game:
     
 
     
-    def moove_compute_dame_eat(self,row,col,selected,list_kill_moove_dame,screen,state):
+    def moove_compute_dame_eat(self,row,col,selected,list_eat_moove_dame,screen,state):
         
-        if self.turn is None and selected in self.list_dame_white and (row, col) == (selected[0] - 2, selected[1] + 2) and selected is not None and (selected[0] - 2, selected[1] + 2) in list_kill_moove_dame[0]:
+        if self.turn is None and selected in self.list_dame_white and (row, col) == (selected[0] - 2, selected[1] + 2) and selected is not None and (selected[0] - 2, selected[1] + 2) in list_eat_moove_dame[0]:
                 print('cgange ')            
                 self.moove_id_eat = 1
                 self.eat_dame_compute(row,col,selected,screen,state)
@@ -39,10 +41,10 @@ class game:
 
 
                     
-        elif  self.turn is None and selected in self.list_dame_white  and (row, col) == (selected[0] - 2, selected[1] - 2) and selected is not None and (selected[0] - 2, selected[1] - 2) in list_kill_moove_dame[0]:
+        elif  self.turn is None and selected in self.list_dame_white  and (row, col) == (selected[0] - 2, selected[1] - 2) and selected is not None and (selected[0] - 2, selected[1] - 2) in list_eat_moove_dame[0]:
                 self.moove_id_eat = 2
                 self.eat_dame_compute(row,col,selected,screen,state)
-                list_kill_moove_dame = None
+                list_eat_moove_dame = None
                 self.turn = 1
         
         
@@ -76,25 +78,7 @@ class game:
                     self.mat[selected[0] + 1][selected[1]- 1] = self.mat[selected[0]][selected[1]] 
                     self.mat[selected[0]][selected[1]] = 0
 
-                    
-    def eat_dame_compute(self,row,col,selected,screen,state,moove_id_eat):
-                    if moove_id_eat ==1:  
-                        self.mat[selected[0] - 1][selected[1] + 1] = 0
-
-                        self.mat[selected[0] - 2][selected[1] + 2] = self.mat[selected[0]][selected[1]] 
-                        self.mat[selected[0]][selected[1]] = 0
-
-                        
-                    if moove_id_eat ==2:
-                        self.mat[selected[0] - 1][selected[1] - 1] = 0
-                        self.mat[selected[0] - 2][selected[1] - 2] = self.mat[selected[0]][selected[1]] 
-                        self.mat[selected[0]][selected[1]] = 0
-
-    def change_turn(self):
-        if self.turn == None:
-                self.turn = 1
-        else:
-              self.turnn = None
+    
     def winner(self):
         self.list_white += self.list_dame_white
         self.list_black += self.list_dame_black
@@ -108,13 +92,45 @@ class game:
                 self.running = False
                 print(self.running)
                 print(f'the winner are {winner}')
-        
+    def can_eat_row_col(self):
+        self.list_white += self.list_dame_white
+        self.list_black += self.list_dame_black
+        for row in range(8):
+            for col in range(8):
+                if (row,col) in self.list_white or (row,col) in self.list_dame_white:      
+                    
+                    if  (row-1,col-1) in self.list_black and (row-2,col-2) in self.list_empty and row-2>=0 and col-2>=0: 
+                            self.moove_yes_white = True
+                            self.moove_row_col = (row,col)
+
+                            
 
 
-                        
-                        
-                        
-                        
+                    
+                    elif (row-2,col+2) in self.list_empty and (row-1,col+1) in self.list_black and row-2>=0 and col+2<8:
+                        self.moove_yes_white = True
+                        self.moove_row_col = (row,col)
+
+                elif (row,col) in self.list_black or (row,col) in self.list_dame_black:
+
+                    if   (row+2,col-2) in self.list_empty and (row+1,col-1) in self.list_white and row+2<8 and col-2>=0:
+                        self.moove_yes_black = True
+                        self.moove_row_col = (row,col)
+
+                    elif (row+2,col+2) in self.list_empty and (row+1,col+1) in self.list_white and row+2<8 and col+2<8:
+                        self.moove_yes_black = True
+                        self.moove_row_col = (row,col)
+
+                elif self.moove_yes_white is False :
+                     self.moove_row_col = None
+                
+
+
+
+                            
+                            
+                            
+                            
 
                         
                         
