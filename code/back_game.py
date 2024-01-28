@@ -28,6 +28,7 @@ class Board:
         self.black_list_kill_dame = None
         self.running = running
         
+        self.cath = None
         self.create_board()
         self.game = game_play.game(self.mat,self.turn,running)  
 
@@ -36,23 +37,24 @@ class Board:
     
 
     def create_board(self):
-        self.mat = np.array([[2, 0, 2, 0, 2, 0, 2, 0],
-                             [0, 2, 0, 2, 0, 2, 0, 2],
+        self.mat = np.array([[0, 2, 0, 2, 0, 2, 0, 2],
                              [2, 0, 2, 0, 2, 0, 2, 0],
+                             [0, 2, 0, 2, 0, 2, 0, 2],
                              [0, 0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 0, 0, 0, 0, 0, 0],
-                             [0, 1, 0, 1, 0, 1, 0, 1],                                                                                                                                                                                                                                
-                             [1, 0, 1, 0, 1, 0, 1, 0],
-                             [0, 1, 0, 1, 0, 1, 0, 1]])
+                             [1, 0, 1, 0, 1, 0, 1, 0],                                                                                                                                                                                                                                
+                             [0, 1, 0, 1, 0, 1, 0, 1],
+                             [1, 0, 1, 0, 1, 0, 1, 0]])
 
         # Matrice de 8x8 avec Pour les 3 premiere lige des valeurs 2 pour noir et 1 pour blanc
     def draw_board(self, screen):
         for row in range(8):
             for col in range(8):
-                color = WHITE if (row + col) % 2 == 0 else BROWN #pour chaque carre mettre 1 fois sur 2 blanc et marron
+                color = BROWN if (row + col) % 2 == 0 else WHITE #pour chaque carre mettre 1 fois sur 2 blanc et marron
                 pygame.draw.rect(screen, color, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
       
     def click(self,screen, row, col):
+        
         
         
         # Ignore events that are not mouse clicks
@@ -65,34 +67,38 @@ class Board:
 
         elif self.selected is None and self.state is None and self.mat[row][col] == 1 or self.mat[row][col] == 2 or self.mat[row][col] == 3 or self.mat[row][col] == 4:
                 self.game.sides()
-                self.selected = (row, col)
                 
-                
-
                 
                 self.valid_moove_white()
                 self.valid_moove_black()
                 self.can_kill()
                 self.can_kill_dame()
+                print(self.selected,'l_78') 
                 self.dame_valid_moove()
+                print(self.selected,'l_79') 
+                self.block_action() 
                 self.draw_future_position(screen)
-
                 
 
                 
                 
                 
-                                
-                self.block_action()  
-                print(self.selected,'l: 87')
-
                 self.state = 'selected'
                 
                 
         if self.state == "selected":
-            print('selected')
+            
+            
+            if (row,col) != self.selected:
+                self.cath = (row,col)
+                self.cancel_bug()
+                print(self.cath,'l_97')                
+                
+
+            
+
             if self.list_moove_black is not None and self.list_moove_white is not None or self.list_kill_moove_black is None or self.list_kill_moove_white is None :
-                print(self.selected,self.list_moove_dame,'l : 94')
+
                 if self.selected in self.game.list_dame_white or self.selected in self.game.list_dame_black:
                     if  self.turn is None and self.selected in self.game.list_dame_white  and (row, col) == (self.selected[0] - 1, self.selected[1] + 1) and self.selected is not None and (self.selected[0] - 1, self.selected[1] + 1) in self.list_moove_dame[0]:
                         moove_id_no_eat = 1
@@ -158,8 +164,9 @@ class Board:
 
                     self.turn = 1
                     self.moove_to = (row,col)
-
                     self.is_dame()
+
+
 
                 if  self.turn == 1 and self.selected in self.game.list_black and (row, col) == (self.selected[0] + 1, self.selected[1] + 1) and self.selected is not None and (self.selected[0] + 1, self.selected[1] + 1) in self.list_moove_black:
 
@@ -169,11 +176,12 @@ class Board:
                     self.state = None
                     self.selected = None
                     self.list_moove_black = None
-
-                    self.turn = None 
                     self.moove_to = (row,col)
 
+                    self.turn = None
                     self.is_dame()
+ 
+
                 if self.turn == 1 and self.selected in self.game.list_black and (row, col) == (self.selected[0] + 1, self.selected[1] - 1) and self.selected is not None and (self.selected[0] + 1, self.selected[1] - 1) in self.list_moove_black:
                     
                     self.mat[self.selected[0] + 1][self.selected[1]- 1] = self.mat[self.selected[0]][self.selected[1]] 
@@ -181,21 +189,19 @@ class Board:
 
                     self.state = None
                     self.selected = None 
+                    self.moove_to = (row,col)
 
                     self.list_moove_black = None
                     self.turn = None 
-                    self.moove_to = (row,col)
                     self.is_dame()
+                
                 
 
             if self.list_kill_moove_white is not None or self.list_kill_moove_black is not None or self.list_kill_moove_dame_white is not None or self.list_kill_moove_dame_black is not None:
-                    
-                    print('l : 188')
-                    print(self.selected,self.state)
+                    print('l : 188 end______')
                     if self.selected in self.game.list_dame_white or self.selected in self.game.list_dame_black:
                         print('l : 194')
 
-                        print(self.list_kill_moove_dame_black)
 
 
 
@@ -205,10 +211,31 @@ class Board:
 
                             self.mat[self.selected[0] - 2][self.selected[1] + 2] = self.mat[self.selected[0]][self.selected[1]] 
                             self.mat[self.selected[0]][self.selected[1]] = 0                        
-                            self.turn = 1
                             self.selected = None
                             self.state = None
-                            self.list_kill_moove_dame_white = None
+                            self.moove_to = (row,col)
+                            self.selected = self.moove_to
+                
+
+                
+                            self.game.sides()
+
+                            self.valid_moove_white()
+                            self.valid_moove_black()
+
+
+                            self.can_kill()
+                            self.can_kill_dame()
+            
+                            if self.list_kill_moove_dame_white is not None:
+                                self.turn = None
+                                self.kill(screen,row,col)   
+                            else:
+                                self.selected = None
+                                self.state = None
+                                print('elsed')
+                                
+                            self.turn = 1
                         elif  self.turn is None and self.selected in self.game.list_dame_white  and (row, col) == (self.selected[0] - 2, self.selected[1] - 2) and self.selected is not None and (self.selected[0] - 2, self.selected[1] - 2) in self.list_kill_moove_dame_white[0]:
                             self.moove_id_eat = 2   
 
@@ -219,8 +246,29 @@ class Board:
 
                             self.selected = None
                             self.state = None 
+                            
+                            self.moove_to = (row,col)
+                            self.selected = self.moove_to
+                
+
+                
+                            self.game.sides()
+
+                            self.valid_moove_white()
+                            self.valid_moove_black()
+
+
+                            self.can_kill()
+                            self.can_kill_dame()
+            
+                            if self.list_kill_moove_dame_white is not None:
+                                self.turn = None
+                                self.kill(screen,row,col)   
+                            else:
+                                self.selected = None
+                                self.selected = None
+                                
                             self.turn = 1
-                            self.list_kill_moove_dame_white = None
                         if self.turn is None and self.selected in self.game.list_dame_white and (row, col) == (self.selected[0] + 2, self.selected[1] + 2) and self.selected is not None and (self.selected[0] + 2, self.selected[1] + 2) in self.list_kill_moove_dame_white[1]:            
 
 
@@ -231,6 +279,28 @@ class Board:
 
                             self.selected = None
                             self.state = None 
+
+                            self.moove_to = (row,col)
+                            self.selected = self.moove_to
+                
+
+                
+                            self.game.sides()
+
+                            self.valid_moove_white()
+                            self.valid_moove_black()
+
+
+                            self.can_kill()
+                            self.can_kill_dame()
+            
+                            if self.list_kill_moove_dame_white is not None:
+                                self.turn = None
+                                self.kill(screen,row,col)   
+                            else:
+                                self.selected = None
+                                self.selected = None
+                                
                             self.turn = 1
                         if self.turn is None and self.selected in self.game.list_dame_white and (row, col) == (self.selected[0] + 2, self.selected[1] -2) and self.selected is not None and (self.selected[0] + 2, self.selected[1]- 2) in self.list_kill_moove_dame_white[1]:            
                         
@@ -239,19 +309,66 @@ class Board:
                             self.mat[self.selected[0] + 2][self.selected[1] - 2] =  self.mat[self.selected[0]][self.selected[1]]
                             self.mat[self.selected[0]][self.selected[1]] = 0
                             
+                            self.selected = None
+                            self.state = None 
 
-                            self.turn = None 
-                        #moove_list_dame_black    
+                            self.moove_to = (row,col)
+                            self.selected = self.moove_to
+                
+
+                
+                            self.game.sides()
+
+                            self.valid_moove_white()
+                            self.valid_moove_black()
+
+
+                            self.can_kill()
+                            self.can_kill_dame()
+            
+                            if self.list_kill_moove_dame_white is not None:
+                                self.turn = None
+                                self.kill(screen,row,col)   
+                            else:
+                                self.selected = None
+                                self.selected = None
+                            self.turn = 1
+
+
+                        #moove_list_dame_black  
+                              
                         if self.turn ==1 and self.selected in self.game.list_dame_black and (row, col) == (self.selected[0] - 2, self.selected[1] + 2) and self.selected is not None and (self.selected[0] - 2, self.selected[1] + 2) in self.list_kill_moove_dame_black[0]:
 
                             self.mat[self.selected[0] - 1][self.selected[1] + 1] = 0
 
                             self.mat[self.selected[0] - 2][self.selected[1] + 2] = self.mat[self.selected[0]][self.selected[1]] 
                             self.mat[self.selected[0]][self.selected[1]] = 0                        
-                            self.turn = None
                             self.selected = None
                             self.state = None
                             self.list_kill_moove_dame_black = None
+
+                            self.moove_to = (row,col)
+                            self.selected = self.moove_to
+                
+
+                
+                            self.game.sides()
+
+                            self.valid_moove_white()
+                            self.valid_moove_black()
+
+
+                            self.can_kill()
+                            self.can_kill_dame()
+            
+                            if self.list_kill_moove_dame_black is not None:
+                                self.turn = 1
+                                self.kill(screen,row,col)   
+                            else:
+                                self.selected = None
+                                self.selected = None
+                                self.list_kill_moove_dame_black = None
+                            self.turn = None
                         elif  self.turn ==1 and self.selected in self.game.list_dame_black  and (row, col) == (self.selected[0] - 2, self.selected[1] - 2) and self.selected is not None and (self.selected[0] - 2, self.selected[1] - 2) in self.list_kill_moove_dame_black[0]:
                             self.moove_id_eat = 2   
 
@@ -262,8 +379,30 @@ class Board:
 
                             self.selected = None
                             self.state = None 
-                            self.turn = None
                             self.list_kill_moove_dame_white = None
+
+                            self.moove_to = (row,col)
+                            self.selected = self.moove_to
+                
+
+                
+                            self.game.sides()
+
+                            self.valid_moove_white()
+                            self.valid_moove_black()
+
+
+                            self.can_kill()
+                            self.can_kill_dame()
+            
+                            if self.list_kill_moove_dame_black is not None:
+                                self.turn = 1
+                                self.kill(screen,row,col)   
+                            else:
+                                self.selected = None
+                                self.selected = None
+                                self.list_kill_moove_dame_black = None
+                            self.turn = None
                         if self.turn==1 and self.selected in self.game.list_dame_black and (row, col) == (self.selected[0] + 2, self.selected[1] + 2) and self.selected is not None and (self.selected[0] + 2, self.selected[1] + 2) in self.list_kill_moove_dame_black[1]:            
 
 
@@ -274,6 +413,28 @@ class Board:
 
                             self.selected = None
                             self.state = None 
+
+                            self.moove_to = (row,col)
+                            self.selected = self.moove_to
+                
+
+                
+                            self.game.sides()
+
+                            self.valid_moove_white()
+                            self.valid_moove_black()
+
+
+                            self.can_kill()
+                            self.can_kill_dame()
+            
+                            if self.list_kill_moove_dame_black is not None:
+                                self.turn = 1
+                                self.kill(screen,row,col)   
+                            else:
+                                self.selected = None
+                                self.selected = None
+                                self.list_kill_moove_dame_black = None
                             self.turn = None
                         if self.turn==1 and self.selected in self.game.list_dame_black and (row, col) == (self.selected[0] + 2, self.selected[1] -2) and self.selected is not None and (self.selected[0] + 2, self.selected[1]- 2) in self.list_kill_moove_dame_black[1]:            
                         
@@ -282,30 +443,32 @@ class Board:
                             self.mat[self.selected[0] + 2][self.selected[1] - 2] =  self.mat[self.selected[0]][self.selected[1]]
                             self.mat[self.selected[0]][self.selected[1]] = 0
                             
-
-                            self.turn = None 
+                            self.selected = None
+                            self.state = None 
                             
-                        
-                             
-                        
 
-                             
-                        
-
-                            """self.moove_to = (row,col)
+                            self.moove_to = (row,col)
                             self.selected = self.moove_to
+                
 
+                
                             self.game.sides()
+
+                            self.valid_moove_white()
+                            self.valid_moove_black()
+
+
                             self.can_kill()
-                            self.can_kill_dame()"""
-                            
-                            """if self.list_kill_moove_dame is not None:
-                                self.turn = None
+                            self.can_kill_dame()
+            
+                            if self.list_kill_moove_dame_black is not None:
+                                self.turn = 1
                                 self.kill(screen,row,col)   
                             else:
-                                selected = None
-                                state = None
-                                self.list_kill_moove_dame = None"""
+                                self.selected = None
+                                self.selected = None
+                                self.list_kill_moove_dame_black = None
+                            self.turn = None
             
                     if self.turn is None and self.selected in self.game.list_white and (row, col) == (self.selected[0] - 2, self.selected[1] + 2) and self.selected is not None and (self.selected[0] - 2, self.selected[1] + 2) in self.list_kill_moove_white:            
                         
@@ -401,7 +564,10 @@ class Board:
                         
                         if self.list_kill_moove_black is not None:
                             self.turn = 1
-                            self.kill(screen,row,col)   
+                            self.kill(screen,row,col) 
+                            self.selected = self.moove_to
+                            self.state = "selected"
+  
                         else:
                             self.selected = None
                             self.state = None
@@ -416,18 +582,6 @@ class Board:
         pass 
 
     
-
-        """elif self.selected  in self.list_row_col:
-                self.list_row_col.remove(self.selected)
-        if len(self.list_row_col)>1:    
-                for first in self.game.list_white:
-                    for last in self.list_row_col:
-                        if last == first:
-                            print(self.selected)
-                            self.selected = None
-                            self.selected = last
-                            print(self.selected)
-                            self.state = "selected"""
  
         
     def is_dame(self):
@@ -443,53 +597,56 @@ class Board:
 
 
     def draw_future_position(self,screen):
-            
         if self.turn is None and self.list_moove_white is not None:
             for pos in self.list_moove_white :
-                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), 10)
+                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), RADIUS_FUTURE_POSITION)
 
                 print('l : 379')
         if self.turn is None and  self.selected in self.game.list_dame_white and self.list_moove_white is not None:
             for pos in self.list_moove_white :
-                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), 10)
+                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), RADIUS_FUTURE_POSITION)
                 print('l : 383')
-        if self.turn is None and  self.selected in self.game.list_dame_white and self.list_moove_black is not None:
+        if self.turn is None and  self.selected in self.game.list_dame_white and self.list_moove_black is not None and self.list_kill_moove_dame_white is None:
             for pos in self.list_moove_black :
-                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), 10)
+                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), RADIUS_FUTURE_POSITION)
                 print('l : 387')
 
-        if self.turn == 1 and  self.selected in self.game.list_dame_black and self.list_moove_white is not None :
+
+        if self.turn is None and self.list_kill_moove_white is not None and self.list_moove_white is None :
+            for pos in self.list_kill_moove_white :
+
+                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), RADIUS_FUTURE_POSITION)
+                print('l : 408')
+
+
+        if self.turn is None and self.black_list_kill_dame is not None and self.selected in self.game.list_dame_white :
+            for pos in self.black_list_kill_dame:
+                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), RADIUS_FUTURE_POSITION)
+                print('l : 413')
+
+        if self.turn == 1 and  self.selected in self.game.list_dame_black and self.list_moove_white is not None and self.list_kill_moove_black is None :
             for pos in self.list_moove_white :
-                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), 10)
+                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), RADIUS_FUTURE_POSITION)
                 print('l : 392')
 
-        if self.turn == 1 and  self.selected in self.game.list_dame_black and self.list_moove_black is not None:
+        if self.turn == 1 and  self.selected in self.game.list_dame_black and self.list_moove_black is not None and self.list_kill_moove_black is None:
             for pos in self.list_moove_black :
-                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), 10)
+                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), RADIUS_FUTURE_POSITION)
                 print('l : 397')
 
 
         if self.turn ==1 and  self.list_moove_black is not None:   
             for pos in self.list_moove_black :
-                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), 10)
+                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), RADIUS_FUTURE_POSITION)
                 print('l : 403')
-
-        if self.turn is None and self.list_kill_moove_white is not None and self.list_moove_white is None :
-            for pos in self.list_kill_moove_white :
-                print(self.selected)
-                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), 10)
-                print('l : 408')
-                print(self.list_kill_moove_white,'408')
-
-        if self.turn is None and self.black_list_kill_dame is not None and self.selected in self.game.list_dame_white :
-            for pos in self.black_list_kill_dame:
-                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), 10)
-                print('l : 413')
-
         if self.turn == 1 and self.list_kill_moove_black is not None and self.list_moove_black is None :   
             for pos in self.list_kill_moove_black :
-                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), 10)
+                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), RADIUS_FUTURE_POSITION)
                 print('l : 418')
+        if self.turn == 1 and self.white_list_kill_dame_black is not None and self.list_moove_black is None :   
+            for pos in self.white_list_kill_dame_black :
+                pygame.draw.circle(screen, BLUE, (pos[1] * SQUARE_SIZE + SQUARE_SIZE // 2, pos[0] * SQUARE_SIZE + SQUARE_SIZE // 2), RADIUS_FUTURE_POSITION)
+                print('l : 423')
         
         
         
@@ -513,25 +670,67 @@ class Board:
 
                     
     def block_action(self):
-        """if self.selected in self.game.list_white  and self.list_moove_white is None and self.list_kill_moove_white is None: 
-                    print('l: 455')
-                    self.state = None 
-                    self.selected = None"""
-        """if self.selected in self.game.list_black and self.list_moove_black is None and self.list_kill_moove_black is None: 
-                    print('l: 459')
-                    self.state = None 
-                    self.selected = None"""
-        if self.turn is None and self.selected in self.game.list_black: 
-            print('l: 463')
-            self.state = None 
-            self.selected = None
-            self.turn = None
-        elif self.turn == 1 and self.selected in self.game.list_white: 
+        
+        
+        """elif self.turn == 1 and self.selected in self.game.list_white: 
+
             print('l: 468')
             self.selected = None
             self.state = None
             self.turn = 1
+        if self.turn is None and self.selected in self.game.list_black: 
+            print('l: 463')
+            self.state = None 
+            self.selected = None
+            self.turn = None"""
         
+        
+        
+        
+        
+        
+
+    def cancel_bug(self):
+        if self.state == "selected" and self.turn is None and self.selected not in self.game.list_dame_white and self.selected in self.game.list_white and self.list_moove_white is None and self.list_kill_moove_white is None:
+
+            print('l__680')
+            self.selected = None
+            self.state = None
+            self.turn = None 
+        if self.state == "selected" and self.turn == 1 and self.selected not in self.game.list_dame_black and self.selected in self.game.list_black and self.list_moove_black is None and self.list_kill_moove_black is None :
+
+            print('l__706')
+            self.selected = None
+            self.state = None
+            self.turn = 1 
+
+        if self.state =="selected" and self.turn is None and self.list_kill_moove_white is None  and self.selected in self.game.list_white and self.cath not in self.list_moove_white :
+                self.selected = None 
+                self.state = None
+                self.turn = None
+                print('l_722')
+        if self.state =="selected" and self.turn is None and self.list_moove_white is None  and self.selected in self.game.list_white and self.cath not in self.list_kill_moove_white :
+                self.selected = None 
+                self.state = None
+                self.turn = None
+                self.list_kill_moove_white = None
+                print('l_734')
+
+        if self.state =="selected" and self.turn ==1 and self.list_kill_moove_black is None and self.selected in self.game.list_black and self.cath not in self.list_moove_black:
+            self.selected = None 
+            self.state = None
+            self.turn = 1
+            print('l_730')
+    
+        if self.state =="selected" and self.turn ==1 and self.list_moove_black is None and self.list_kill_moove_black is not None and self.selected in self.game.list_black and self.cath not in self.list_kill_moove_black :
+            
+
+            self.selected = None 
+            self.state = None
+            self.turn = 1
+            self.list_kill_moove_black = None
+            print('l_739')
+            
 
     def valid_moove_white(self):
         self.list_kill_moove_white = None
@@ -539,11 +738,12 @@ class Board:
             if  (self.selected[0],self.selected[1]) in self.game.list_white or (self.selected[0],self.selected[1]) in self.game.list_dame_black or (self.selected[0],self.selected[1]) in self.game.list_dame_white:
                 if (self.selected[0]-1,self.selected[1]+1) not in self.game.list_empty and (self.selected[0]-1,self.selected[1]-1) not in self.game.list_empty:
                     self.list_moove_white = None
+                    
                     print('l:465')
      
                 elif  (self.selected[0]-1,self.selected[1]+1) in self.game.list_empty and (self.selected[0]-1,self.selected[1]-1) in self.game.list_empty: 
                     self.list_moove_white =[(self.selected[0]-1,self.selected[1]+1),(self.selected[0]-1,self.selected[1]-1)]
-                    print('l:469')
+                    print('l:468')
                     
                 elif (self.selected[0]-1,self.selected[1]-1) in self.game.list_empty and (self.selected[0]-1,self.selected[1]+1) not in self.game.list_empty   or  self.selected[1]+1>=8 and self.selected[0]-1>=0 and self.selected[1]-1>=0  :
                     
@@ -568,9 +768,8 @@ class Board:
                     self.list_moove_black =[(self.selected[0]+1,self.selected[1]+1)]
 
                     print('l : 495')
-                elif (self.selected[0]+1,self.selected[1]-1) in self.game.list_empty and (self.selected[0]+1,self.selected[1]+1) not in self.game.list_empty and (self.selected[0]+2,self.selected[1]+2) not in self.game.list_empty and self.selected[1]-1>=0 and self.selected[0]+1<8 :
+                elif (self.selected[0]+1,self.selected[1]-1) in self.game.list_empty and (self.selected[0]+1,self.selected[1]+1) not in self.game.list_empty and self.selected[1]-1>=0 and self.selected[0]+1<8 :
                     self.list_moove_black =[(self.selected[0]+1,self.selected[1]-1)]  
-                    print(self.list_moove_black)
                     print('l :499')
                 
                 else:
@@ -602,6 +801,7 @@ class Board:
                 self.list_kill_moove_black =[(self.selected[0]+2,self.selected[1]-2)]
                 self.list_moove_black = None
                 print('l 519')
+                print(self.selected,'l_420')
 
             elif (self.selected[0]+2,self.selected[1]+2) in self.game.list_empty and (self.selected[0]+1,self.selected[1]+1) in self.game.list_white and self.selected[0]+2<8 and self.selected[1]+2<8:
                 self.list_kill_moove_black = [(self.selected[0]+2,self.selected[1]+2)]
@@ -610,6 +810,7 @@ class Board:
                   
     def can_kill_dame(self):
         self.game.list_black += self.game.list_dame_black
+
         if (self.selected[0],self.selected[1]) in self.game.list_dame_white:
             if   (self.selected[0]+2,self.selected[1]-2) in self.game.list_empty and (self.selected[0]+1,self.selected[1]-1) in self.game.list_black and self.selected[0]+2<8 and self.selected[1]-2>=0:
                 self.black_list_kill_dame =[(self.selected[0]+2,self.selected[1]-2)]
@@ -647,13 +848,14 @@ class Board:
                 self.list_moove_dame = (None,None)
         
         if self.selected in self.game.list_dame_black :
-                self.list_moove_white = None
-                self.list_moove_black = None
-                self.list_kill_moove_dame_black = [self.white_list_kill_dame_black,self.list_kill_moove_black]
-                print('l: 572')
+                if self.list_kill_moove_white is not None or self.black_list_kill_dame is not None:
+                    self.list_moove_white = None
+                    self.list_moove_black = None
+                    self.list_kill_moove_dame_black = [self.white_list_kill_dame_black,self.list_kill_moove_black]
+                    print('l: 572')
 
         if self.selected in self.game.list_dame_white:
-                
+                if self.list_kill_moove_white is not None or self.black_list_kill_dame is not None:
         
                     self.list_moove_white = None
                     self.list_moove_black = None
@@ -667,7 +869,7 @@ class Board:
                 self.click(screen,row,col)
                 
                 
-            elif self.list_kill_moove_dame is not None:
+            elif self.list_kill_moove_dame_white is not None or self.list_kill_moove_dame_black is not None:
                 self.click(screen,row,col)
         
         
