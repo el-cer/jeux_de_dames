@@ -537,7 +537,6 @@ class Board:
                     for value in self.dame_movements:
                          if value in self.pieces:
                               self.dame_movements.remove(value)
-                print(self.dame_movements)
                         
             
                             
@@ -628,7 +627,6 @@ class Board:
                                                         self.list_index_dame_black[id_eat_black] = (self.tuple[0],self.tuple[1])
                                                         self.list_eat_dame_black.append((self.tuple[0]+1,self.tuple[1]+1))
                                                         self.list_row_col_main[id_eat_black] = (self.tuple[0]+1,self.tuple[1]+1)
-                                                        print(self.list_eat_dame_black,'l_604')
                                     
                                     if (int(row)+i,int(col)-i) in self.game.list_white or (int(row)+i,int(col)-i) in self.game.list_dame_white :
                                                
