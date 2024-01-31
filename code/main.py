@@ -13,7 +13,7 @@ pygame.init()
 
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Chess Board Example")
+pygame.display.set_caption("Checker GAME ELIOT CERON ")
 clock = pygame.time.Clock()
 running = True
 
@@ -52,7 +52,7 @@ while running:
             checkers_back.draw_board(screen)
 
             # Draw the pieces
-            checkers_back.click(screen,row,col,running)
+            checkers_back.click(screen,row,col)
             checkers_back.draw_pieces(screen)    
     pygame.display.update()
 
