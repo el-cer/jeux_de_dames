@@ -1,6 +1,5 @@
 import pygame
 import sys
-import numpy as np
 from back_game import Board
 from config import *
 import game_play
@@ -23,7 +22,6 @@ checkers_back = Board(running)
 # Game loop
 running = True
 turn = 0
-click = False
 selected = None
 def regularise_row_col(pos):
     row = event.pos[1] // SQUARE_SIZE
@@ -43,17 +41,13 @@ while running:
             pos = pygame.mouse.get_pos() 
             row,col = regularise_row_col(pos)
             screen.fill(WHITE)
-
-            
-    # Clear the screen
-                
-            
-            # Draw the chessboard
+ 
             checkers_back.draw_board(screen)
 
-            # Draw the pieces
             checkers_back.click(screen,row,col)
-            checkers_back.draw_pieces(screen)    
+
+            checkers_back.draw_pieces(screen)   
+
     pygame.display.update()
 
 
